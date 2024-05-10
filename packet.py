@@ -15,7 +15,7 @@ def create_data_packets(data, max_segment_size, file_id):
 
     # create the last packet with the remaining data
     packets.append(
-        packet(packet_id + 1, data[packet_id * max_data_size:], file_id, True))
+        packet(packet_id, data[packet_id * max_data_size:], file_id, True))
     return packets
 
 
