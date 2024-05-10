@@ -14,3 +14,5 @@ with socket(AF_INET, SOCK_STREAM) as server:
         newMsg = 'Hello to our server, hope our service helps you'
         clientSock.send(newMsg.encode())
         clientSock.close()
+
+
