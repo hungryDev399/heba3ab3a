@@ -24,6 +24,7 @@ class packet:
         self.packet_id = packet_id
         self.data = data if isinstance(data, bytes) else data.encode()
         self.trailer = 0x00000000 if not is_last else 0xFFFFFFFF
+        self.file_id = file_id
         self.packet = struct.pack('!HH{}sI'.format(
             len(self.data)), packet_id, file_id, data, self.trailer)
 
@@ -31,3 +32,8 @@ class packet:
         # H for the 16 bits
         # {}s for a string of unspecified length
         # I for the 32 bits
+
+
+class AckPacket:
+    def __init__(self, packet_binary):
+        self.packet = packet_binary[:32]

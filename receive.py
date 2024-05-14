@@ -1,5 +1,6 @@
 import socket
 import struct
+import packet
 
 
 def reconstruct_image(data, output_filename):
@@ -14,18 +15,21 @@ def receive_packets(ip_address, port):
 
     data = b''
     while True:
-        packet, addr = sock.recvfrom(4096)  # buffer size is 4096 bytes
+        packet_rec, addr = sock.recvfrom(4096)  # buffer size is 4096 bytes
         print(f"received packet from {addr} of size {
-              len(packet)} with id {struct.unpack('!H', packet[:2])[0]}")
-
+              len(packet_rec)} with id {struct.unpack('!H', packet_rec[:2])[0]}")
+        # send an ack
+        ack_packet = packet.AckPacket(packet_rec).packet
+        sock.sendto(ack_packet, addr)
+        print(f"sent ack to {addr}")
         # append each packet after removing its metadata
-        data += packet[4:-4]
+        data += packet_rec[4:-4]
         # get the last 4 bytes of the packet
-        last_32_bits = struct.unpack('!I', packet[-4:])[0]
+        last_32_bits = struct.unpack('!I', packet_rec[-4:])[0]
 
         if last_32_bits == 0xFFFFFFFF:
             # get the file id
-            file_id = packet[:2][0]
+            file_id = packet_rec[:2][0]
             break
 
     # ceconstruct the image

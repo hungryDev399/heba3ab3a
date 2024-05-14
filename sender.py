@@ -22,6 +22,15 @@ def send(filename, receiver_ip, receiver_port, max_segment_size, window_size_n):
             sender.sendto(packets[i].packet, (receiver_ip, receiver_port))
             print(f'sent packet with id {
                   struct.unpack("!h", packets[i].packet[:2])[0]}')
+        # receive the ack
+        # wait for the ack
+        while True:
+            ack_packet, addr = sender.recvfrom(4096)
+            print(f'received ack packet from {addr}')
+            ack_packet_id = struct.unpack('!H', ack_packet[:2])[0]
+            if ack_packet_id == len(packets) - 1:
+                break
+        print(f'received ack packet from {addr}')
 
         print('image sent')
 
