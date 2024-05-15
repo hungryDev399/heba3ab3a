@@ -1,5 +1,6 @@
 import struct
 
+
 def create_data_packets(data, max_segment_size, file_id):
     packets = []
     packet_id = 0
@@ -27,7 +28,6 @@ class Packet:
         self.packet = struct.pack('!HH{}sI'.format(
             len(self.data)), packet_id, file_id, self.data, self.trailer)
 
-    @staticmethod
     def from_binary(data):
         packet_id, file_id, packet_data, trailer = struct.unpack(
             '!HH{}sI'.format(len(data) - 8), data)

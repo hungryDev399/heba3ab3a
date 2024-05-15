@@ -2,6 +2,7 @@ import socket
 import struct
 import packet
 
+
 def reconstruct_image(data, output_filename):
     with open(output_filename, 'wb') as f:
         f.write(data)
@@ -21,7 +22,8 @@ def receive_packets(ip_address, port):
             packet_binary, addr = sock.recvfrom(4096)
             received_packet = packet.Packet.from_binary(packet_binary)
 
-            print(f"Received packet with id {received_packet.packet_id} from {addr}")
+            print(f"Received packet with id {
+                  received_packet.packet_id} from {addr}")
 
             if received_packet.packet_id == expected_id:
                 data[received_packet.packet_id] = received_packet.data
@@ -29,7 +31,7 @@ def receive_packets(ip_address, port):
                 expected_id += 1
                 file_id = received_packet.file_id
 
-                # Accept subsequent packets if already received
+                # accept subsequent packets if already received
                 while expected_id in data:
                     expected_id += 1
             else:
@@ -42,12 +44,12 @@ def receive_packets(ip_address, port):
             if received_packet.trailer == 0xFFFFFFFF:
                 break
 
-        # Reconstruct the image
+        # reconstruct the image
         sorted_data = b''.join(data[i] for i in sorted(data.keys()))
         reconstruct_image(sorted_data, f'images\\received_{file_id}.jpeg')
 
-    # Receive multiple files
-    for _ in range(3):  # Adjust the range based on your number of files
+    # receive the three files
+    for _ in range(3):
         receive_file()
 
 
