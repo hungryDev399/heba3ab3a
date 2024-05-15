@@ -1,5 +1,3 @@
-Here is the rewritten text in a more professional format and tone:
-
 **Enhancing Protocol Performance through TCP-inspired Features**
 
 To improve the performance of our protocol, we propose integrating several features inspired by TCP:
