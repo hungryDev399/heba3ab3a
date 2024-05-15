@@ -66,4 +66,4 @@ window_size = 4  # Adjust the size as needed
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-```
+
