@@ -2,7 +2,6 @@ import socket
 import struct
 import packet
 
-
 def reconstruct_image(data, output_filename):
     with open(output_filename, 'wb') as f:
         f.write(data)
@@ -13,27 +12,43 @@ def receive_packets(ip_address, port):
     server_address = (ip_address, port)
     sock.bind(server_address)
 
-    data = b''
-    while True:
-        packet_rec, addr = sock.recvfrom(4096)  # buffer size is 4096 bytes
-        print(f"received packet from {addr} of size {
-              len(packet_rec)} with id {struct.unpack('!H', packet_rec[:2])[0]}")
-        # send an ack
-        ack_packet = packet.AckPacket(packet_rec).packet
-        sock.sendto(ack_packet, addr)
-        print(f"sent ack to {addr}")
-        # append each packet after removing its metadata
-        data += packet_rec[4:-4]
-        # get the last 4 bytes of the packet
-        last_32_bits = struct.unpack('!I', packet_rec[-4:])[0]
+    def receive_file():
+        data = {}
+        last_id = -1
+        expected_id = 0
+        file_id = 0
+        while True:
+            packet_binary, addr = sock.recvfrom(4096)
+            received_packet = packet.Packet.from_binary(packet_binary)
 
-        if last_32_bits == 0xFFFFFFFF:
-            # get the file id
-            file_id = packet_rec[:2][0]
-            break
+            print(f"Received packet with id {received_packet.packet_id} from {addr}")
 
-    # ceconstruct the image
-    reconstruct_image(data, f'images\\received_{file_id}.jpeg')
+            if received_packet.packet_id == expected_id:
+                data[received_packet.packet_id] = received_packet.data
+                last_id = received_packet.packet_id
+                expected_id += 1
+                file_id = received_packet.file_id
+
+                # Accept subsequent packets if already received
+                while expected_id in data:
+                    expected_id += 1
+            else:
+                data[received_packet.packet_id] = received_packet.data
+
+            ack_packet = packet.AckPacket(received_packet.packet_id).packet
+            sock.sendto(ack_packet, addr)
+            print(f"Sent ack for packet id {received_packet.packet_id}")
+
+            if received_packet.trailer == 0xFFFFFFFF:
+                break
+
+        # Reconstruct the image
+        sorted_data = b''.join(data[i] for i in sorted(data.keys()))
+        reconstruct_image(sorted_data, f'images\\received_{file_id}.jpeg')
+
+    # Receive multiple files
+    for _ in range(3):  # Adjust the range based on your number of files
+        receive_file()
 
 
 ip_address = '127.0.0.1'
