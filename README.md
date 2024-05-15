@@ -16,3 +16,56 @@ A lightweight, UDP-based file transfer protocol with a sliding window mechanism 
 - `receive.py`: The receiver side of the protocol that listens for packets, acknowledges them, and reconstructs the image files.
 
 ### File Structure
+```
+.
+├── images
+│   ├── large.jpeg
+│   ├── medium.jpeg
+│   └── small.jpeg
+├── packet.py
+├── sender.py
+└── receive.py
+```
+
+## Usage
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/yourusername/reliable-image-transfer.git
+cd reliable-image-transfer
+```
+
+### 2. Prepare Images
+Place your images in the `images` directory and ensure they are named according to the `imgs` list in `sender.py`.
+
+### 3. Run the Receiver
+Start the receiver to listen for incoming packets.
+```bash
+python receive.py
+```
+
+### 4. Run the Sender
+Start the sender to send images sequentially to the receiver.
+```bash
+python sender.py
+```
+
+## Configuration
+- **Packet Loss Simulation:** The sender simulates a 15% packet loss by default. You can adjust this by changing the probability condition in the `send` function of `sender.py`.
+
+```python
+if random.randint(1, 100) >= 15:  # Adjust this value for different loss rates
+    sender.sendto(packets[i].packet, (receiver_ip, receiver_port))
+```
+
+- **Sliding Window Size:** The window size is adjustable in `sender.py` through the `window_size` parameter.
+
+```python
+window_size = 4  # Adjust the size as needed
+```
+
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+```
+
+To use this README effectively, save it as a `README.md` file in the root of your GitHub repository. Make sure to adjust the image paths and file names accordingly.
