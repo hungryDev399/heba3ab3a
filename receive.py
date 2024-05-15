@@ -1,6 +1,7 @@
 import socket
 import struct
 import packet
+import datetime
 
 
 def reconstruct_image(data, output_filename):
@@ -23,7 +24,7 @@ def receive_packets(ip_address, port):
             received_packet = packet.Packet.from_binary(packet_binary)
 
             print(f"Received packet with id {
-                  received_packet.packet_id} from {addr}")
+                  received_packet.packet_id} from {addr} at time {datetime.datetime.now()}")
 
             if received_packet.packet_id == expected_id:
                 data[received_packet.packet_id] = received_packet.data
@@ -39,7 +40,8 @@ def receive_packets(ip_address, port):
 
             ack_packet = packet.AckPacket(received_packet.packet_id).packet
             sock.sendto(ack_packet, addr)
-            print(f"Sent ack for packet id {received_packet.packet_id}")
+            print(f"Sent ack for packet id {
+                  received_packet.packet_id} at time {datetime.datetime.now()}")
 
             if received_packet.trailer == 0xFFFFFFFF:
                 break

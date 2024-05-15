@@ -69,19 +69,21 @@ def send(filename, receiver_ip, receiver_port, max_segment_size, window_size, fi
                                       (receiver_ip, receiver_port))
                         packet_logs.append((packets[i].packet_id, timestamp))
                         print(f"Sent packet with id {
-                              packets[i].packet_id}, file id {packets[i].file_id}")
+                              packets[i].packet_id}, file id {packets[i].file_id} at time {datetime.datetime.now()}")
 
             # wait for acknowledgments
             try:
                 while not all(acks_received[window_start:window_start + window_size]):
                     ack_packet, _ = sender.recvfrom(4096)
                     ack_packet_id = struct.unpack('!H', ack_packet[:2])[0]
-                    print(f"Received ack for packet id {ack_packet_id}")
-                    if ack_packet_id < total_packets:
+                    print(f"Received ack for packet id {
+                          ack_packet_id} at time {datetime.datetime.now()}")
+                    if ack_packet_id == window_start:
                         acks_received[ack_packet_id] = True
                         if ack_packet_id == window_start:
                             while window_start < total_packets and acks_received[window_start]:
                                 window_start += 1
+                continue
 
             except timeout:
                 # retransmit packets in the window
@@ -93,33 +95,35 @@ def send(filename, receiver_ip, receiver_port, max_segment_size, window_size, fi
                         retransmissions.append(
                             (packets[i].packet_id, timestamp))
                         print(f"Retransmitting packet with id {
-                              packets[i].packet_id}")
+                              packets[i].packet_id} at time {datetime.datetime.now()}")
 
                         # wait for acknowledgments after retransmission
-                        try:
-                            while not acks_received[i]:
-                                ack_packet, _ = sender.recvfrom(4096)
-                                ack_packet_id = struct.unpack(
-                                    '!H', ack_packet[:2])[0]
-                                print(f"Received ack for packet id {
-                                      ack_packet_id}")
-                                if ack_packet_id < total_packets:
-                                    acks_received[ack_packet_id] = True
-                                    if ack_packet_id == window_start:
-                                        while window_start < total_packets and acks_received[window_start]:
-                                            window_start += 1
-                        except timeout:
-                            continue
+                try:
+                    while not all(acks_received[window_start:window_start + window_size]):
+                        ack_packet, _ = sender.recvfrom(4096)
+                        ack_packet_id = struct.unpack(
+                            '!H', ack_packet[:2])[0]
+                        print(f"Received ack for packet id {
+                              ack_packet_id} at time {datetime.datetime.now()}")
+                        if ack_packet_id == window_start:
+                            acks_received[ack_packet_id] = True
+                            if ack_packet_id == window_start:
+                                while window_start < total_packets and acks_received[window_start]:
+                                    window_start += 1
+                    continue
+
+                except timeout:
+                    continue
 
         end_time = datetime.datetime.now()
 
-        print(f"Image {filename} sent")
+        print(f"Image {filename} sent at time {datetime.datetime.now()}")
         plot_packet_transmissions(packet_logs, retransmissions, filename, window_size,
                                   timeout_seconds, packet_loss_rate, start_time, end_time, total_packets, total_bytes)
 
 
 # Send images
-# imgs = ['large', 'medium', 'small']
-imgs = ['small']
+imgs = ['large', 'medium', 'small']
+# imgs = ['small']
 for index, img in enumerate(imgs, start=1):
     send(f"images/{img}.jpeg", '127.0.0.1', 12345, 1024, 5, index)
