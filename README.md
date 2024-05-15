@@ -67,5 +67,3 @@ window_size = 4  # Adjust the size as needed
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 ```
-
-To use this README effectively, save it as a `README.md` file in the root of your GitHub repository. Make sure to adjust the image paths and file names accordingly.
